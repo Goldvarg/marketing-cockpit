@@ -240,10 +240,3 @@ ATTRIBUTION SUMMARY
 - Dalessandro, B., et al. (2012). "Causally Motivated Attribution for Online Advertising"
 - Shao, X., & Li, L. (2011). "Data-driven Multi-touch Attribution Models"
 
-## Support
-
-For questions or issues, please refer to the main repository documentation or open an issue.
-
-## License
-
-This implementation is part of the marketing-cockpit project.
