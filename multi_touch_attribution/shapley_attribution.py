@@ -10,6 +10,7 @@ considering all possible orderings and combinations of channels.
 
 import pandas as pd
 import numpy as np
+import math
 from itertools import combinations, permutations
 from typing import Dict, List, Set, Tuple
 from collections import defaultdict
@@ -240,9 +241,9 @@ class ShapleyAttribution:
                 # Calculate Shapley weight
                 s_size = len(subset_set)
                 weight = (
-                    np.math.factorial(s_size) *
-                    np.math.factorial(n - s_size - 1) /
-                    np.math.factorial(n)
+                    math.factorial(s_size) *
+                    math.factorial(n - s_size - 1) /
+                    math.factorial(n)
                 )
 
                 shapley_value += weight * marginal_contribution
