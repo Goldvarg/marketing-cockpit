@@ -1,0 +1,11 @@
+Model,Channel,Estimated ROI,True ROI,Error %
+Simple Regression,Google,0.491,2.5,80.3
+Simple Regression,Meta,9.18,2.0,359.0
+Simple Regression,LinkedIn,24.079,1.8,1237.7
+Simple Regression,TV,42.144,1.5,2709.6
+Simple Regression,Email,19.732,4.0,393.3
+Robyn-Style,Google,0.103,2.5,95.9
+Robyn-Style,Meta,0.564,2.0,71.8
+Robyn-Style,LinkedIn,0.345,1.8,80.9
+Robyn-Style,TV,0.637,1.5,57.5
+Robyn-Style,Email,0.42,4.0,89.5
