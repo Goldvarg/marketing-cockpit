@@ -1,242 +1,223 @@
-# Multi-Touch Attribution: Shapley Value Model
+# Multi-Touch Attribution Analysis
 
-This folder contains a complete implementation of **Shapley value attribution** for marketing channels. The model calculates the fair marginal contribution of each marketing touchpoint in a customer's conversion journey.
+## Executive Summary
 
-## What is Shapley Value Attribution?
+**The Problem**: Most companies use "last-touch" attribution, which gives 100% credit to the final marketing channel before a conversion. This massively undervalues channels that introduce customers to your brand.
 
-Shapley value attribution is a game-theory-based approach that fairly distributes credit among marketing channels by:
+**What We Found**:
 
-1. **Considering all possible orderings**: It evaluates how each channel contributes across all possible sequences of touchpoints
-2. **Measuring marginal contributions**: For each channel, it calculates the additional value when that channel is added to different combinations
-3. **Fair allocation**: The Shapley value represents the average marginal contribution, providing a mathematically fair way to attribute credit
+| Channel | Last Touch Credit | Fair Credit (Shapley) | Verdict |
+|---------|-------------------|----------------------|---------|
+| Display | 6.3% | 20.4% | **Severely undervalued** |
+| Content | 8.0% | 17.0% | **Severely undervalued** |
+| Social | 11.0% | 14.8% | Undervalued |
+| Paid Search | 36.1% | 19.2% | **Overvalued** |
+| Direct | 20.7% | 12.4% | Overvalued |
+| Email | 18.0% | 16.1% | About right |
 
-### Shapley Value vs Other Attribution Models
+**The Bottom Line**: If you're using last-touch attribution, you're probably over-investing in "closer" channels (Paid Search, Direct) and under-investing in "introducer" channels (Display, Content) that bring new customers into your funnel.
 
-| Model | Description | Pros | Cons |
-|-------|-------------|------|------|
-| **Last Touch** | 100% credit to last touchpoint | Simple | Ignores customer journey |
-| **First Touch** | 100% credit to first touchpoint | Simple | Ignores nurturing |
-| **Linear** | Equal credit to all touchpoints | Fair distribution | No consideration of importance |
-| **Time Decay** | More credit to recent touchpoints | Considers recency | Arbitrary decay function |
-| **Shapley Value** | Credit based on marginal contribution | Mathematically fair, considers all combinations | Computationally intensive |
+---
 
-## Files
+## The Hidden Value Problem
 
-- **`shapley_attribution.py`**: Core implementation of the Shapley value attribution model
-- **`run_attribution_analysis.py`**: Script to run complete analysis with visualizations
-- **`README.md`**: This documentation file
+Here's the issue in a nutshell:
 
-## Installation
+```
+Customer Journey Example:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Ensure you have the required Python packages:
+  Display Ad    →    Blog Post    →    Email    →    Google Search    →    💰 Purchase
+  (Day 1)            (Day 3)          (Day 7)        (Day 10)
+
+  Last Touch:     0%              0%            0%           100%
+  Fair Share:    ~25%           ~20%          ~25%          ~30%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+The Display ad introduced this customer. Without it, they never would have found you. But last-touch gives it zero credit!
+
+---
+
+## Results Visualizations
+
+### Last Touch vs Multi-Touch Attribution
+
+![Last vs Shapley](results/last_vs_shapley.png)
+
+This is the most important chart. The left side shows how different the two approaches are. The right side shows which channels gain or lose credit when you switch to multi-touch.
+
+**Green bars** = channels that deserve more credit than last-touch gives them
+**Red bars** = channels getting too much credit under last-touch
+
+### Channel Roles: Introducers vs Closers
+
+![Channel Roles](results/channel_roles.png)
+
+This scatter plot reveals each channel's role:
+- **Above the diagonal line**: Closers (good at finishing sales)
+- **Below the diagonal line**: Introducers (good at starting customer journeys)
+- **On the line**: Balanced channels
+
+### All Attribution Models Compared
+
+![All Models](results/attribution_comparison.png)
+
+Six different ways to slice the data. Notice how Last Touch (red) gives drastically different answers than the other models.
+
+### Summary Dashboard
+
+![Summary](results/model_summary.png)
+
+The executive view: pie charts comparing Last Touch vs Shapley, plus a bar chart of all models.
+
+---
+
+## Attribution Models Explained
+
+### 1. Last Touch Attribution
+**How it works**: 100% credit to the final touchpoint before conversion.
+
+**Example**: Display → Email → Paid Search → *Purchase*
+- Paid Search gets 100%, everything else gets 0%
+
+**When to use**: Simple reporting, bottom-of-funnel optimization
+
+**Problem**: Ignores the entire customer journey
+
+---
+
+### 2. First Touch Attribution
+**How it works**: 100% credit to the first touchpoint.
+
+**Example**: *Display* → Email → Paid Search → Purchase
+- Display gets 100%, everything else gets 0%
+
+**When to use**: Measuring brand awareness campaigns
+
+**Problem**: Ignores everything that happened after initial contact
+
+---
+
+### 3. Linear Attribution
+**How it works**: Equal credit to all touchpoints.
+
+**Example**: Display → Email → Paid Search → Purchase
+- Each channel gets 33.3%
+
+**When to use**: When you believe all touchpoints matter equally
+
+**Problem**: Doesn't account for position in journey
+
+---
+
+### 4. Time Decay Attribution
+**How it works**: More credit to recent touchpoints, less to older ones.
+
+**Example**: Display → Email → Paid Search → Purchase
+- Display: 14%, Email: 29%, Paid Search: 57%
+
+**When to use**: Short sales cycles, immediate response campaigns
+
+**Problem**: Still undervalues introducers
+
+---
+
+### 5. Position-Based (U-Shaped)
+**How it works**: 40% to first touch, 40% to last touch, 20% split among middle.
+
+**Example**: Display → Email → Paid Search → Purchase
+- Display: 40%, Email: 20%, Paid Search: 40%
+
+**When to use**: When first and last interactions are most important
+
+**Problem**: Arbitrary 40/40/20 split
+
+---
+
+### 6. Shapley Value (Data-Driven)
+**How it works**: Uses game theory to calculate each channel's marginal contribution based on actual data patterns.
+
+**Example**: Calculates what happens to conversion rates when each channel is present vs absent, across all combinations.
+
+**When to use**: When you want the most accurate picture
+
+**Problem**: More complex to explain to stakeholders
+
+---
+
+## The Data
+
+We analyzed **5,000 customer journeys** with **16,341 touchpoints** resulting in **3,007 conversions**.
+
+### Channels Analyzed
+- **Display**: Banner ads, programmatic advertising
+- **Content**: Blog posts, whitepapers, organic content
+- **Social**: Facebook, Instagram, LinkedIn posts
+- **Email**: Newsletter, promotional emails
+- **Paid Search**: Google Ads, Bing Ads
+- **Direct**: Direct website visits, bookmarks
+
+### Journey Statistics
+- Average journey length: 3.2 touchpoints
+- Conversion rate: 60%
+- Average conversion value: $90
+
+---
+
+## Key Takeaways
+
+### 1. Don't Trust Last-Touch Alone
+It's simple but misleading. Use it as one data point, not the whole picture.
+
+### 2. Fund Your Introducers
+Display and Content marketing are probably undervalued in your current reporting. They bring in new customers that closers convert.
+
+### 3. Think in Journeys, Not Channels
+Customers don't convert from a single ad. They interact with multiple touchpoints. Your attribution should reflect this.
+
+### 4. Test with Incrementality
+The best way to know a channel's true value is to turn it off and measure what happens. Attribution models are estimates.
+
+---
+
+## Project Structure
+
+```
+multi_touch_attribution/
+├── generate_data.py          # Creates synthetic customer journeys
+├── attribution_models.py     # All 6 attribution models
+├── visualize_results.py      # Chart generation
+├── run_analysis.py           # Main runner script
+├── touchpoints.csv           # Raw touchpoint data
+├── conversions.csv           # Conversion data
+└── results/
+    ├── attribution_comparison.csv
+    ├── attribution_comparison.png
+    ├── last_vs_shapley.png
+    ├── channel_roles.png
+    └── model_summary.png
+```
+
+---
+
+## How to Run
 
 ```bash
-pip install pandas numpy matplotlib seaborn
+# Run the complete analysis
+python run_analysis.py
+
+# Or run individual steps:
+python generate_data.py        # Generate new data
+python attribution_models.py   # Run models only
+python visualize_results.py    # Create charts only
 ```
 
-## Usage
+---
 
-### Quick Start
+## Further Reading
 
-Run the complete attribution analysis:
-
-```bash
-cd /home/user/marketing-cockpit
-python multi_touch_attribution/run_attribution_analysis.py
-```
-
-This will:
-1. Load marketing clicks and order data from `raw_data/`
-2. Build customer journeys
-3. Calculate Shapley values for each channel
-4. Calculate removal effects
-5. Generate visualizations (PNG files)
-6. Create a comprehensive report
-
-### Using the ShapleyAttribution Class
-
-You can also use the model programmatically:
-
-```python
-from multi_touch_attribution.shapley_attribution import ShapleyAttribution
-
-# Initialize model
-model = ShapleyAttribution()
-
-# Load data
-model.load_data(
-    marketing_clicks_path='raw_data/marketing_clicks.csv',
-    orders_path='raw_data/orders.csv',
-    attribution_window_days=30  # Attribution window
-)
-
-# Calculate Shapley values
-shapley_values = model.calculate_shapley_values(
-    use_revenue=True,      # Use revenue (True) or conversion count (False)
-    sample_size=50000      # Sample for faster computation (optional)
-)
-
-# Calculate removal effects
-removal_effects = model.calculate_removal_effects()
-
-# Get summary
-summary = model.get_attribution_summary()
-print(summary)
-
-# Analyze channel interactions
-interactions = model.analyze_channel_interactions()
-print(interactions.head(10))
-```
-
-## Key Metrics
-
-### 1. Shapley Value
-
-The **Shapley value** for a channel represents its average marginal contribution across all possible combinations of channels.
-
-**Formula**:
-```
-φᵢ = Σ [|S|! × (n - |S| - 1)! / n!] × [v(S ∪ {i}) - v(S)]
-```
-
-Where:
-- `S` is a subset of channels not containing channel `i`
-- `v(S)` is the conversion value for subset `S`
-- `n` is the total number of channels
-- `|S|` is the size of subset `S`
-
-**Interpretation**:
-- Higher Shapley value = greater contribution to conversions
-- Can be used to optimize budget allocation
-- Fair attribution across all channels
-
-### 2. Removal Effect
-
-The **removal effect** shows the impact of removing a channel from the full set of channels.
-
-**Formula**:
-```
-Removal Effect(i) = v(All Channels) - v(All Channels \ {i})
-```
-
-**Interpretation**:
-- Shows the value lost if a channel is eliminated
-- Useful for understanding channel dependencies
-- Helps identify critical channels
-
-## Output Files
-
-After running the analysis, the following files are generated in `multi_touch_attribution/`:
-
-### Data Files
-- **`shapley_results.csv`**: Summary table with Shapley values and removal effects for each channel
-- **`channel_interactions.csv`**: Conversion values for different channel combinations
-
-### Visualizations
-- **`shapley_values.png`**: Bar chart of Shapley values by channel
-- **`removal_effects.png`**: Bar chart of removal effects by channel
-- **`attribution_comparison.png`**: Pie charts comparing Shapley and removal distributions
-- **`shapley_vs_removal.png`**: Side-by-side comparison of both metrics
-
-### Report
-- **`ATTRIBUTION_REPORT.md`**: Complete analysis report with findings and recommendations
-
-## Data Requirements
-
-The model expects two CSV files in the `raw_data/` folder:
-
-### 1. marketing_clicks.csv
-
-| Column | Description |
-|--------|-------------|
-| `user_id` | Unique identifier for the user |
-| `click_ts` | Timestamp of the click |
-| `channel` | Marketing channel (e.g., Google, Meta, LinkedIn) |
-
-### 2. orders.csv
-
-| Column | Description |
-|--------|-------------|
-| `user_id` | Unique identifier for the user |
-| `order_ts` | Timestamp of the order |
-| `revenue` | Revenue from the order |
-
-## Configuration
-
-You can adjust the following parameters in `run_attribution_analysis.py`:
-
-```python
-ATTRIBUTION_WINDOW = 30    # Days to look back for attributing clicks
-SAMPLE_SIZE = 50000        # Number of journeys to sample (faster computation)
-USE_REVENUE = True         # Use revenue (True) or conversion count (False)
-```
-
-## Algorithm Details
-
-### Step 1: Build Customer Journeys
-
-The model creates customer journeys by:
-1. Grouping marketing clicks by user
-2. Linking clicks to conversions within the attribution window
-3. Creating sequences of touchpoints for each conversion
-
-### Step 2: Calculate Conversion Values
-
-For each possible subset of channels, calculate:
-- Total conversions or revenue when those channels are present
-- Average conversion value per journey
-
-### Step 3: Calculate Shapley Values
-
-For each channel:
-1. Iterate through all possible subsets not containing the channel
-2. Calculate marginal contribution when adding the channel
-3. Weight by the Shapley formula
-4. Sum across all subsets
-
-### Step 4: Calculate Removal Effects
-
-For each channel:
-1. Calculate value with all channels
-2. Calculate value without the channel
-3. Compute the difference
-
-## Performance Considerations
-
-- **Computational Complexity**: O(2^n) where n is the number of channels
-- **Sampling**: For large datasets, use `sample_size` parameter to sample journeys
-- **Memory**: Stores conversion values for all channel subsets
-- **Recommended**: Use sampling for datasets with >100k journeys
-
-## Example Output
-
-```
-ATTRIBUTION SUMMARY
-================================================================================
-    channel  shapley_value  removal_effect  shapley_pct  removal_pct
-     Google         145.23          189.45        42.3%        45.2%
-       Meta          98.67          121.34        28.7%        28.9%
-   LinkedIn          79.45           95.23        23.1%        22.7%
-     Direct          20.12           13.45         5.9%         3.2%
-```
-
-## Interpretation Guide
-
-### High Shapley Value + High Removal Effect
-→ **Critical channel**: Major contributor, would be costly to remove
-
-### High Shapley Value + Low Removal Effect
-→ **Independent contributor**: Works well on its own, less dependent on other channels
-
-### Low Shapley Value + High Removal Effect
-→ **Supporting channel**: Enhances other channels, important for synergy
-
-### Low Shapley Value + Low Removal Effect
-→ **Limited impact**: Consider reducing investment or eliminating
-
-## References
-
-- Shapley, L. S. (1953). "A Value for n-person Games"
-- Dalessandro, B., et al. (2012). "Causally Motivated Attribution for Online Advertising"
-- Shao, X., & Li, L. (2011). "Data-driven Multi-touch Attribution Models"
-
+- [Google's Attribution Guide](https://support.google.com/analytics/answer/1662518)
+- [The Shapley Value in Marketing](https://en.wikipedia.org/wiki/Shapley_value)
+- [Multi-Touch Attribution: A Data-Driven Approach](https://hbr.org/2017/05/a-refresher-on-marketing-attribution-models)
