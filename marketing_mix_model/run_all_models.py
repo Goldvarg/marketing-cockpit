@@ -132,8 +132,11 @@ def run_all_models():
         model3.plot_response_curves(save_path=os.path.join(output_dir, 'response_curves.png'))
         model3.plot_rhat_diagnostics(save_path=os.path.join(output_dir, 'convergence_diagnostics.png'))
 
+        # Extract ROI and contribution data for comparison
         results['Meridian'] = {
             'model': model3,
+            'roi': model3.get_roi_dict(),
+            'contribution': model3.get_contribution_dict(),
             'note': 'See visualizations for detailed results'
         }
 
@@ -208,11 +211,12 @@ def generate_comparison(results, ground_truth, channels, timings, results_dir):
     # =========================================================================
     # Contribution Comparison
     # =========================================================================
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
 
     model_data = [
         ('Simple Regression', results.get('Simple Regression', {}).get('contribution', {})),
         ('Robyn-Style', results.get('Robyn-Style', {}).get('contribution', {})),
+        ('Meridian', results.get('Meridian', {}).get('contribution', {})),
     ]
 
     colors = plt.cm.Set3(np.linspace(0, 1, len(channels)))
@@ -226,10 +230,10 @@ def generate_comparison(results, ground_truth, channels, timings, results_dir):
             axes[idx].text(0.5, 0.5, 'No data', ha='center', va='center')
             axes[idx].set_title(name, fontsize=12)
 
-    # Third pie for ground truth spend allocation
+    # Fourth pie for ground truth spend allocation
     spend_truth = [5000, 4000, 2000, 8000, 500]  # From data generation
-    axes[2].pie(spend_truth, labels=channels, autopct='%1.1f%%', colors=colors)
-    axes[2].set_title('Actual Spend Allocation', fontsize=12, fontweight='bold')
+    axes[3].pie(spend_truth, labels=channels, autopct='%1.1f%%', colors=colors)
+    axes[3].set_title('Actual Spend Allocation', fontsize=12, fontweight='bold')
 
     plt.suptitle('Channel Contribution Comparison', fontsize=14, fontweight='bold')
     plt.tight_layout()
@@ -243,7 +247,13 @@ def generate_comparison(results, ground_truth, channels, timings, results_dir):
     fig, ax = plt.subplots(figsize=(12, 6))
 
     errors = {}
-    for model_name in ['Simple Regression', 'Robyn-Style']:
+    model_colors = {
+        'Simple Regression': '#3498db',
+        'Robyn-Style': '#e74c3c',
+        'Meridian': '#9b59b6'
+    }
+
+    for model_name in ['Simple Regression', 'Robyn-Style', 'Meridian']:
         if model_name in results and 'roi' in results[model_name]:
             roi = results[model_name]['roi']
             error = []
@@ -257,8 +267,9 @@ def generate_comparison(results, ground_truth, channels, timings, results_dir):
     if errors:
         models = list(errors.keys())
         error_values = list(errors.values())
+        bar_colors = [model_colors.get(m, '#95a5a6') for m in models]
 
-        bars = ax.bar(models, error_values, color=['#3498db', '#e74c3c'])
+        bars = ax.bar(models, error_values, color=bar_colors)
         ax.set_ylabel('Mean Absolute Percentage Error (%)', fontsize=12)
         ax.set_title('Model Accuracy: ROI Estimation Error', fontsize=14, fontweight='bold')
         ax.grid(axis='y', alpha=0.3)
@@ -278,7 +289,7 @@ def generate_comparison(results, ground_truth, channels, timings, results_dir):
     # =========================================================================
     summary_data = []
 
-    for model_name in ['Simple Regression', 'Robyn-Style']:
+    for model_name in ['Simple Regression', 'Robyn-Style', 'Meridian']:
         if model_name in results and 'roi' in results[model_name]:
             roi = results[model_name]['roi']
             for ch in channels:

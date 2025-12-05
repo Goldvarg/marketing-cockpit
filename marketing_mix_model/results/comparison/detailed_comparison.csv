@@ -6,6 +6,11 @@ Simple Regression,TV,42.144,1.5,2709.6
 Simple Regression,Email,19.732,4.0,393.3
 Robyn-Style,Google,0.103,2.5,95.9
 Robyn-Style,Meta,0.564,2.0,71.8
-Robyn-Style,LinkedIn,0.345,1.8,80.9
-Robyn-Style,TV,0.637,1.5,57.5
-Robyn-Style,Email,0.42,4.0,89.5
+Robyn-Style,LinkedIn,0.344,1.8,80.9
+Robyn-Style,TV,0.636,1.5,57.6
+Robyn-Style,Email,0.341,4.0,91.5
+Meridian,Google,1.127,2.5,54.9
+Meridian,Meta,0.541,2.0,72.9
+Meridian,LinkedIn,15.159,1.8,742.2
+Meridian,TV,5.261,1.5,250.8
+Meridian,Email,5.762,4.0,44.1
